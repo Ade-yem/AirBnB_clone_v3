@@ -21,4 +21,3 @@ def stats():
         num = storage.count(clas)
         cnt_dict[clas] = num
     return jsonify(cnt_dict)
-
