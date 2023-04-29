@@ -12,24 +12,14 @@ def status():
     return jsonify({"status": "OK"})
 
 
-@app_views.route("/stats", methods=["GET"])
-def stats():
+@app_views.route('/stats', methods=['GET'])
+def get_stats():
     """Retrieves the number of each objects by type"""
-    # Get counts of each object type using count() method from storage
-    amenity_count = storage.count("Amenity")
-    city_count = storage.count("City")
-    place_count = storage.count("Place")
-    review_count = storage.count("Review")
-    state_count = storage.count("State")
-    user_count = storage.count("User")
+    # Define a list of object types to count
+    obj_types = ["Amenity", "City", "Place", "Review", "State", "User"]
     
-    # Return JSON response with counts for each object type
-    return jsonify({
-        "amenities": amenity_count,
-        "cities": city_count,
-        "places": place_count,
-        "reviews": review_count,
-        "states": state_count,
-        "users": user_count
-    })
-
+    # Use a dictionary comprehension to count objects of each type and store in a dictionary
+    counts = {t.lower() + 's': storage.count(t) for t in obj_types}
+    
+    # Return the counts as a JSON response
+    return jsonify(counts)
