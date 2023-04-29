@@ -68,8 +68,8 @@ test_db_storage.py'])
                             "{:s} method needs a docstring".format(func[0]))
 
 
-class TestFileStorage(unittest.TestCase):
-    """Test the FileStorage class"""
+class TestDBStorage(unittest.TestCase):
+    """Test the DBStorage class"""
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_all_returns_dict(self):
         """Test that all returns a dictionaty"""
@@ -78,11 +78,63 @@ class TestFileStorage(unittest.TestCase):
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_all_no_class(self):
         """Test that all returns all rows when no class is passed"""
+        storage = DBStorage()
+        storage.reload()
+        all_objs = storage.all()
+        lent = len(all_objs)
+        Amenity.save(Amenity(name="test"))
+        all_objs = storage.all()
+        self.assertEqual(len(all_objs), lent + 1)
+        self.assertIn('Amenity.test', all_objs)
+        storage.delete(all_objs['Amenity.test'])
+        storage.close()
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_new(self):
-        """test that new adds an object to the database"""
+        """Test that new adds an object to the database"""
+        # storage = DBStorage()
+        # storage.reload()
+        # obj = State(name="test")
+        # storage.new(obj)
+        # key = obj.__class__.__name__ + '.' + obj.id
+        # self.assertIn(key, storage.all().keys())
 
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
-        """Test that save properly saves objects to file.json"""
+        """Test the save method of DBStorage"""
+        # storage = DBStorage()
+        # new_state = State()
+        # new_state.name = "California"
+        # storage.new(new_state)
+        # storage.save()
+        # all_states = storage.all(State)
+        # self.assertIn(new_state, all_states.values())
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing db storage")
+    def test_get(self):
+        """Test that get retrieves an object from DBStorage"""
+        storage = DBStorage()
+        new_dict = {}
+        for key, value in classes.items():
+            with self.subTest(key=key, value=value):
+                instance = value()
+                instance_key = instance.__class__.__name__ + "." + instance.id
+                new_dict[instance_key] = instance
+                storage._DBStorage__session = new_dict
+                retrieved = storage.get(value, instance.id)
+                self.assertEqual(retrieved, instance)
+
+    @unittest.skipIf(models.storage_t == 'db', "not testing db storage")
+    def test_count(self):
+        """Test that count returns the number of objects in storage"""
+        storage = DBStorage()
+        new_dict = {}
+        count = 0
+        for key, value in classes.items():
+            with self.subTest(key=key, value=value):
+                instance = value()
+                instance_key = instance.__class__.__name__ + "." + instance.id
+                new_dict[instance_key] = instance
+                count += 1
+                storage._DBStorage__session = new_dict
+                self.assertEqual(storage.count(), count)
