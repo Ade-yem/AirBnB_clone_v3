@@ -6,18 +6,30 @@ from flask import jsonify
 from models import storage
 
 
-@app_views.route("/status", methods=["GET"], strict_slashes=False)
+@app_views.route("/status", methods=["GET"])
 def status():
     """status of the web app"""
     return jsonify({"status": "OK"})
 
 
-@app_views.route("/stats", strict_slashes=False)
+@app_views.route("/stats", methods=["GET"])
 def stats():
-    """stats of the database"""
-    cnt_dict = {}
-    cls_list = ["State", "City", "Amenity", "User", "Place", "Review"]
-    for clas in cls_list:
-        num = storage.count(clas)
-        cnt_dict[clas] = num
-    return jsonify(cnt_dict)
+    """Retrieves the number of each objects by type"""
+    # Get counts of each object type using count() method from storage
+    amenity_count = storage.count("Amenity")
+    city_count = storage.count("City")
+    place_count = storage.count("Place")
+    review_count = storage.count("Review")
+    state_count = storage.count("State")
+    user_count = storage.count("User")
+    
+    # Return JSON response with counts for each object type
+    return jsonify({
+        "amenities": amenity_count,
+        "cities": city_count,
+        "places": place_count,
+        "reviews": review_count,
+        "states": state_count,
+        "users": user_count
+    })
+
