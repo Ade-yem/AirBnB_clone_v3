@@ -87,3 +87,30 @@ def update_place(place_id):
             setattr(place, key, value)
     storage.save()
     return jsonify(place.to_dict()), 200
+
+
+@app_views.route('/places_search', methods=['POST'])
+def search_places():
+    """
+    Searches for Place objects according to a JSON in the request body
+    """
+    if not request.json:
+        abort(400, "Not a JSON")
+    data = request.json
+    if not data:
+        places = storage.all(Place).values()
+        return jsonify([place.to_dict() for place in places])
+    states = data.get('states', [])
+    cities = data.get('cities', [])
+    amenities = data.get('amenities', [])
+    if not isinstance(states, list) or not isinstance(cities, list)\
+            or not isinstance(amenities, list):
+        abort(400, "Invalid JSON format")
+    places = []
+    for place in storage.all(Place).values():
+        if (not states or place.city.state_id in states) and\
+                (not cities or place.city_id in cities):
+            if all(amenity.id in [a.id for a in place.amenities]
+                    for amenity in amenities):
+                places.append(place)
+    return jsonify([place.to_dict() for place in places])
